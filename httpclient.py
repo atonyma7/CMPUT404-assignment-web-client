@@ -22,7 +22,7 @@ import sys
 import socket
 import re
 # you may use urllib to encode data appropriately
-import urllib.parse
+from urllib.parse import urlparse, urlencode
 
 def help():
     print("httpclient.py [GET/POST] [URL]\n")
@@ -41,13 +41,13 @@ class HTTPClient(object):
         return None
 
     def get_code(self, data):
-        return None
+        return int(data.split()[1])
 
     def get_headers(self,data):
-        return None
+        return data.split('\r\n\r\n')[0]
 
     def get_body(self, data):
-        return None
+        return data.split('\r\n\r\n')[1]
     
     def sendall(self, data):
         self.socket.sendall(data.encode('utf-8'))
@@ -70,12 +70,55 @@ class HTTPClient(object):
     def GET(self, url, args=None):
         code = 500
         body = ""
-        return HTTPResponse(code, body)
+
+        o = urlparse(url)
+        self.connect(o.hostname, o.port if o.port else 80)
+        self.sendall('GET {} HTTP/1.1\r\n'.format(o.path if o.path else '/'))
+        self.sendall('Host: {}\r\n'.format(o.hostname))
+        self.sendall('Connection: close\r\n')
+        self.sendall('\r\n')
+
+        data = self.recvall(self.socket)
+
+        #As a user when I GET or POST I want the result printed to stdout
+        body = self.get_body(data)
+        print(body)
+        
+        self.close()
+
+        return HTTPResponse(self.get_code(data), body)
 
     def POST(self, url, args=None):
         code = 500
         body = ""
-        return HTTPResponse(code, body)
+
+
+        if args == None:
+            args = ''
+        else: 
+            args = urlencode(args)
+
+        o = urlparse(url)
+        self.connect(o.hostname, o.port if o.port else 80)
+        self.sendall("POST {} HTTP/1.1\r\n".format(o.path if o.path else '/'))
+        self.sendall("Host: {}\r\n".format(o.hostname))
+        self.sendall("Content-Type: application/x-www-form-urlencoded\r\n")
+        self.sendall("Content-Length: {}\r\n".format(len(args)))
+        self.sendall("Connection: close\r\n")
+        self.sendall("\r\n")
+        self.sendall(args)
+
+        data = self.recvall(self.socket)
+        #As a user when I GET or POST I want the result printed to stdout
+        body = self.get_body(data)
+        print(body)
+
+        #As a user when I GET or POST I want the result printed to stdout
+        print(body)
+
+        self.close()
+
+        return HTTPResponse(self.get_code(data), body)
 
     def command(self, url, command="GET", args=None):
         if (command == "POST"):
