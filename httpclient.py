@@ -79,7 +79,6 @@ class HTTPClient(object):
         self.sendall('\r\n')
 
         data = self.recvall(self.socket)
-
         #As a user when I GET or POST I want the result printed to stdout
         body = self.get_body(data)
         print(body)
@@ -111,9 +110,6 @@ class HTTPClient(object):
         data = self.recvall(self.socket)
         #As a user when I GET or POST I want the result printed to stdout
         body = self.get_body(data)
-        print(body)
-
-        #As a user when I GET or POST I want the result printed to stdout
         print(body)
 
         self.close()
