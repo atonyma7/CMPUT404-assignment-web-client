@@ -75,6 +75,7 @@ class HTTPClient(object):
         self.connect(o.hostname, o.port if o.port else 80)
         self.sendall('GET {} HTTP/1.1\r\n'.format(o.path if o.path else '/'))
         self.sendall('Host: {}\r\n'.format(o.hostname))
+        self.sendall('Accept: */*\r\n')
         self.sendall('Connection: close\r\n')
         self.sendall('\r\n')
 
@@ -101,6 +102,7 @@ class HTTPClient(object):
         self.connect(o.hostname, o.port if o.port else 80)
         self.sendall("POST {} HTTP/1.1\r\n".format(o.path if o.path else '/'))
         self.sendall("Host: {}\r\n".format(o.hostname))
+        self.sendall('Accept: */*\r\n')
         self.sendall("Content-Type: application/x-www-form-urlencoded\r\n")
         self.sendall("Content-Length: {}\r\n".format(len(args)))
         self.sendall("Connection: close\r\n")
