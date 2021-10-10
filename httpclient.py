@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# Copyright 2016 Abram Hindle, https://github.com/tywtyw2002, and https://github.com/treedust
+# Copyright 2016 Abram Hindle, Anthony Ma, https://github.com/tywtyw2002, and https://github.com/treedust
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,9 +44,11 @@ class HTTPClient(object):
         return int(data.split()[1])
 
     def get_headers(self,data):
+        #get index before header body split
         return data.split('\r\n\r\n')[0]
 
     def get_body(self, data):
+        #get index after header body split
         return data.split('\r\n\r\n')[1]
     
     def sendall(self, data):
@@ -70,8 +72,10 @@ class HTTPClient(object):
     def GET(self, url, args=None):
         code = 500
         body = ""
-
         o = urlparse(url)
+
+        #sending requests and headers
+        #default path is '/' and default port is 80
         self.connect(o.hostname, o.port if o.port else 80)
         self.sendall('GET {} HTTP/1.1\r\n'.format(o.path if o.path else '/'))
         self.sendall('Host: {}\r\n'.format(o.hostname))
@@ -79,6 +83,7 @@ class HTTPClient(object):
         self.sendall('Connection: close\r\n')
         self.sendall('\r\n')
 
+        #recieveing response
         data = self.recvall(self.socket)
         #As a user when I GET or POST I want the result printed to stdout
         body = self.get_body(data)
@@ -99,6 +104,9 @@ class HTTPClient(object):
             args = urlencode(args)
 
         o = urlparse(url)
+
+        #sending requests and headers
+        #default path is '/' and default port is 80
         self.connect(o.hostname, o.port if o.port else 80)
         self.sendall("POST {} HTTP/1.1\r\n".format(o.path if o.path else '/'))
         self.sendall("Host: {}\r\n".format(o.hostname))
